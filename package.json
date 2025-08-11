@@ -1,0 +1,18 @@
+{
+  "name": "projmanagement",
+  "version": "1.0.0",
+  "description": "A project management app",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node index.js"
+  },
+  "author": "Shivank Tyagi",
+  "license": "ISC",
+  "dependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "devDependencies": {
+    "prettier": "3.6.2"
+  }
+}
