@@ -1,7 +1,7 @@
 import Mailgen from "mailgen";
 import nodemailer from "nodemailer";
 
-const sendEMail = async (options) => {
+const sendEmail = async (options) => {
   const mailGenerator = new Mailgen({
     theme: "default",
     product: {
@@ -10,13 +10,15 @@ const sendEMail = async (options) => {
     },
   });
 
-  const emaiilBody = mailGenerator.generatePlainText(
-    options.emailVerificationTemplate
-  );
+  // use options.mailGenContent instead of options.emailVerificationTemplate
+  if (!options.mailGenContent || !options.mailGenContent.body) {
+    throw new Error("Invalid mailGenContent provided");
+  }
 
-  const emailHtml = mailGenerator.generate(options.emailVerificationTemplate);
+  const emailText = mailGenerator.generatePlaintext(options.mailGenContent);
+  const emailHtml = mailGenerator.generate(options.mailGenContent);
 
-  const tranporter = nodemailer.createTransport({
+  const transporter = nodemailer.createTransport({
     host: process.env.MAILTRAP_SMPT_HOST,
     port: process.env.MAILTRAP_SMPT_PORT,
     auth: {
@@ -29,13 +31,13 @@ const sendEMail = async (options) => {
     from: "mail.projectmanager@example.com",
     to: options.email,
     subject: options.subject,
-    text: emaiilBody,
+    text: emailText,
     html: emailHtml,
   };
 
   try {
-    await tranporter.sendMail(mail);
-    return true; //indicate email sent successfully:
+    await transporter.sendMail(mail);
+    return true;
   } catch (error) {
     console.log("Email sending error", error);
     throw error;
@@ -81,4 +83,4 @@ const passwordResetTemplate = (username, resetLink) => {
   };
 };
 
-export { emailVerificationTemplate, passwordResetTemplate, sendEMail };
+export { emailVerificationTemplate, passwordResetTemplate, sendEmail };

@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
@@ -107,13 +107,13 @@ userSchema.methods.generateTemporaryToken = function () {
 
   // hashed token to store in db for security purpose:
   const hashedToken = crypto
-    .createHash("shivu123")
+    .createHash("sha256")
     .update(unHashedToken)
     .digest("hex"); // digest() method used to convert the hash object inot a string of hexadecomal number
 
-  const tokenExpiryTime = Ddate.now() + 10 * 60 * 1000; //10 minutes:
+  const tokenExpiryTime = Date.now() + 10 * 60 * 1000; //10 minutes:
 
   return { unHashedToken, hashedToken, tokenExpiryTime };
 };
 
-export const user = mongoose.model("user", userSchema);
+export const User = mongoose.model("user", userSchema);

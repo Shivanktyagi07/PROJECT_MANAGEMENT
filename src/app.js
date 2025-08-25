@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import healthcheckRouter from "./routes/healthcheck.routes.js";
+import authRouter from "./routes/auth.routes.js";
 const app = express();
 
 //basic middleware configurations to parse JSON requests:
@@ -13,8 +14,9 @@ app.use(
 );
 app.use(express.static("public"));
 
-// Importing and using the healthcheck routes
-app.use("/api/vi/healthcheck", healthcheckRouter);
+// Importing and using the  routes
+app.use("/api/v1/healthcheck", healthcheckRouter);
+app.use("/api/v1/auth", authRouter);
 
 // CORS middleware configuration to allow cross-origin requests
 app.use(
