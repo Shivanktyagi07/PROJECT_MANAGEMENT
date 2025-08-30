@@ -8,8 +8,6 @@ const userRegisterValidator = () => {
       .withMessage("Username is required")
       .isLength({ min: 3, max: 30 })
       .withMessage("Username must be between 3 and 30 characters long")
-      .isEmail()
-      .withMessage("Username must be a valid email address")
       .isLowercase()
       .withMessage("Username must be in lowercase"),
 
@@ -18,17 +16,31 @@ const userRegisterValidator = () => {
       .notEmpty()
       .withMessage("Email is required")
       .isEmail()
-      .withMessage("A valid email is required"),
+      .withMessage("Please provide a valid email address"),
 
-    bosy("password")
-      .trim()
+    body("password")
       .notEmpty()
       .withMessage("Password is required")
       .isLength({ min: 6 })
-      .withMessage("Password must be at least 6 characters long")
-      .optional()
-      .trim(),
+      .withMessage("Password must be at least 6 characters long"),
   ];
 };
 
-export { userRegisterValidator };
+const userLoginValidator = () => {
+  return [
+    body("email")
+      .trim()
+      .notEmpty()
+      .withMessage("Email is required")
+      .isEmail()
+      .withMessage("Please enter a valid email"),
+
+    body("password")
+      .notEmpty()
+      .withMessage("Password is required")
+      .isLength({ min: 6 })
+      .withMessage("Password must be at least 6 characters long"),
+  ];
+};
+
+export { userRegisterValidator, userLoginValidator };
