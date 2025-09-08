@@ -10,13 +10,19 @@ import { sendEmail, emailVerificationTemplate } from "../utils/mail.js";
 const generateAccessandRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
-    const accessToken = user.generateAuthToken();
+    if (!user) {
+      throw new ApiError(404, "User not found while generating tokens");
+    }
+
+    const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
 
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
+
     return { accessToken, refreshToken };
   } catch (error) {
+    console.error("Token generation error:", error.message);
     throw new ApiError(
       500,
       "Something went wrong while generating AccessToken"
@@ -101,7 +107,8 @@ const registerUser = asyncHandler(async (req, res) => {
 // Login Controller
 // ---------------------------
 const login = asyncHandler(async (req, res) => {
-  const { email, password, username } = req.params; // assuming you’re sending via URL params
+  // ✅ Get credentials from body, not params
+  const { email, password } = req.body;
 
   if (!email) {
     throw new ApiError(
@@ -121,7 +128,6 @@ const login = asyncHandler(async (req, res) => {
 
   // Check password validity
   const isPasswordValid = await user.comparePassword(password);
-
   if (!isPasswordValid) {
     const randomMessage =
       funnyInvalidPassword[
@@ -135,8 +141,8 @@ const login = asyncHandler(async (req, res) => {
     user._id
   );
 
-  const loggedInUSer = await User.findById(user._id).select(
-    "-password -refreshToken -emailVerificationToken -emailVerificationTokenExpiry "
+  const loggedInUser = await User.findById(user._id).select(
+    "-password -refreshToken -emailVerificationToken -emailVerificationTokenExpiry"
   );
 
   const options = {
@@ -152,7 +158,7 @@ const login = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         {
-          user: loggedInUSer,
+          user: loggedInUser,
           accessToken,
           refreshToken,
         },
@@ -161,4 +167,28 @@ const login = asyncHandler(async (req, res) => {
     );
 });
 
-export { registerUser, login };
+const logoutUser = asyncHandler(async (req, res) => {
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        refreshToken: "",
+      },
+    },
+    {
+      new: true,
+    }
+  );
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiError(200, {}, "Signing off human😎!"));
+});
+
+export { registerUser, login, logoutUser };
