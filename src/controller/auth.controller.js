@@ -167,6 +167,9 @@ const login = asyncHandler(async (req, res) => {
     );
 });
 
+// ---------------------------
+// Logout Controller
+// ---------------------------
 const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
@@ -191,4 +194,85 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiError(200, {}, "Signing off human😎!"));
 });
 
-export { registerUser, login, logoutUser };
+// ---------------------------
+// Read User By ID
+// ---------------------------
+
+const getUserById = asyncHandler(async (req, res) => {
+  const { Id } = req.params;
+  const user = await User.findById(Id).select(
+    "-password -refreshToken -emailVerificationToken -emailVerificationTokenExpiry"
+  );
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, user, "User fetched successfully!😎"));
+});
+
+// ---------------------------
+// update User
+// ---------------------------
+
+const updateUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { username, email, role } = req.body;
+
+  const user = await User.findByIdAndUpdate(
+    id,
+    { $set: { username, email, role } },
+    { new: true, runValidators: true }
+  ).select("-password -refreshToken");
+
+  if (!user) {
+    throw new ApiError(404, "User Not Found");
+  }
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, { user }, "User updated successfully"));
+});
+
+// ---------------------------
+// get ALl User
+// ---------------------------
+
+const getAllUsers = asyncHandler(async (req, res) => {
+  const users = await User.find().select("-password -refreshToken");
+  res
+    .status(200)
+    .json(new ApiResponse(200, { users }, "All users fetched successfully"));
+});
+
+// ---------------------------
+// Delete  User
+// ---------------------------
+
+const deleteUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const user = await User.findByIdAndDelete(id).select(
+    "-password -refreshToken"
+  );
+
+  if (!user) {
+    throw new ApiError(404, "User Not Found");
+  }
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, { user }, "User Deleted Successfully"));
+});
+
+export {
+  registerUser,
+  login,
+  logoutUser,
+  getUserById,
+  updateUser,
+  getAllUsers,
+  deleteUser,
+};
