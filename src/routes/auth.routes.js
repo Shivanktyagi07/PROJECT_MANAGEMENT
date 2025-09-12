@@ -1,9 +1,15 @@
 import express from "express";
+
 import {
   login,
   logoutUser,
   registerUser,
+  getUserById,
+  getAllUsers,
+  updateUser,
+  deleteUser,
 } from "../controller/auth.controller.js";
+
 import { userRegisterValidator } from "../validators/index.js";
 import { validate } from "../middlewares/validator.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -16,4 +22,16 @@ router.route("/register").post(userRegisterValidator(), validate, registerUser);
 router.route("/login").post(userRegisterValidator(), validate, login);
 
 router.route("/logout").post(verifyJWT, logoutUser);
+
+// Get all users (🔒 protected - only logged-in users or admins can see)
+router.route("/users").get(verifyJWT, getAllUsers);
+
+// Get single user by ID
+router.route("/users/:id").get(verifyJWT, getUserById);
+
+// Update user by ID
+router.route("/users/:id").put(verifyJWT, updateUser);
+
+// Delete user by ID
+router.route("/users/:id").delete(verifyJWT, deleteUser);
 export default router;
