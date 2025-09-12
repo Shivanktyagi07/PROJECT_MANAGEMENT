@@ -267,6 +267,34 @@ const deleteUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, { user }, "User Deleted Successfully"));
 });
 
+// ---------------------------
+//Multiple Users Registration
+// ---------------------------
+
+const registerUsers = async (req, res) => {
+  try {
+    // Expecting an array of users in request body
+    const users = req.body;
+
+    if (!Array.isArray(users)) {
+      return res.status(400).json({
+        success: false,
+        message: "Request body should be an array of users",
+      });
+    }
+
+    const newUsers = await User.insertMany(users);
+
+    res.status(201).json({
+      success: true,
+      message: "Users registered successfully",
+      users: newUsers,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export {
   registerUser,
   login,
@@ -275,4 +303,5 @@ export {
   updateUser,
   getAllUsers,
   deleteUser,
+  registerUsers,
 };
